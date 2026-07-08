@@ -46,7 +46,7 @@ export const getTripsByUser = async (req: Request, res: Response) => {
         const { userId } = req.params;
         const trips = await Trip.find({ owner: userId, visibility: "public" })
             .populate("owner", "username avatar")
-            .populate("itineraries", "title description")
+            .populate("itinerary", "title description")
             .populate("tasks", "title isCompleted assignedTo")
             .populate("comments", "author text");
 
@@ -74,9 +74,25 @@ export const getMyTrips = async (req: Request, res: Response) => {
 export const getOneTrip = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+
         const trip = await Trip.findById(id)
             .populate("owner", "username avatar")
             .populate("members", "username avatar")
+            .populate({
+                path: "itineraries",
+                populate: {
+                    path: "days",
+                    options: {
+                        sort: { date: 1 },
+                    },
+                    populate: {
+                        path: "activities",
+                        options: {
+                            sort: { time: 1 },
+                        },
+                    },
+                },
+            })
             .populate("tasks", "title isCompleted assignedTo")
             .populate("comments", "author text");
 
@@ -93,11 +109,11 @@ export const getOneTrip = async (req: Request, res: Response) => {
 export const createTrip = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user?._id || (req as any).user?.id;
-        
+
         if (!userId) {
             return sendError(res, "No se ha podido identificar quién organiza este viaje", 401);
         }
-        
+
         const tripData = {
             ...req.body,
             owner: userId,

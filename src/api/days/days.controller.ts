@@ -19,7 +19,12 @@ export const getDaysByItinerary = async (req: Request, res: Response) => {
 
 export const createDay = async (req: Request, res: Response) => {
     try {
-        const newDay = await Day.create(req.body);
+        const { itineraryId } = req.params;
+
+        const newDay = await Day.create({
+            itineraryId,
+            ...req.body,
+        });
 
         return sendSuccess(res, newDay, "Día creado", 201);
     } catch (error) {

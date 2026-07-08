@@ -14,7 +14,7 @@ export const checkAuth = async (req: AuthRequest, res: Response, next: NextFunct
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret") as AuthPayload;
         const user = await User.findOne({ email: decoded.email }).lean();
         req.user = {...decoded, ...user}; // Inyectamos el payload decodificado en el request
-        console.log(req.user);
+        // console.log(req.user);
         return next();
     } catch {
         return sendError(res, "Token no válido o expirado", 401);

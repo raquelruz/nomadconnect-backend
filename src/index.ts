@@ -48,7 +48,7 @@ app.use("/api/trips", tripRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
-app.use("/api/itinerary", itineraryRoutes);
+app.use("/api/itineraries", itineraryRoutes);
 app.use("/api/days", dayRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/comments", commentRoutes);

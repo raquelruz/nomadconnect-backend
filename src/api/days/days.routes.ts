@@ -5,8 +5,8 @@ export const dayRoutes = Router();
 
 dayRoutes.get("/:itineraryId", getDaysByItinerary);
 
-dayRoutes.post("/", createDay);
+dayRoutes.post("/:itineraryId", createDay);
 
-dayRoutes.put("/:id", editDay);
+dayRoutes.put("/:itineraryId", editDay);
 
-dayRoutes.delete("/:id", deleteDay);
+dayRoutes.delete(":itineraryId", deleteDay);

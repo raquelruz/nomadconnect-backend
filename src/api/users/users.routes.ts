@@ -1,13 +1,18 @@
 import { Router } from "express";
-import { createUser, deleteUser, editUser, getAllUsers, getLogin, getOneUser, getRegister } from "./users.controller.js";
+import { createUser, deleteUser, editUser, getAllUsers, getOneUser, updateAvatar } from "./users.controller.js";
+import { uploadAvatar } from "../../config/cloudinary.js";
+import { checkAuth } from "../auth/auth.middlewares.js";
 
 export const userRoutes: Router = Router();
 
-// userRoutes.get("/register", getRegister);
-// userRoutes.get("/login", getLogin);
-
 userRoutes.get("/", getAllUsers);
+
 userRoutes.get("/:id", getOneUser);
+
 userRoutes.post("/", createUser);
+
 userRoutes.put("/:id", editUser);
+
+userRoutes.patch("/avatar", checkAuth, uploadAvatar.single("avatar"), updateAvatar);
+
 userRoutes.delete("/:id", deleteUser);
