@@ -21,5 +21,5 @@ const createUploader = (folder: string) =>
         limits: { fileSize: 10 * 1024 * 1024 }, // 5 MB por archivo
     });
 
-export const uploadAvatar = createUploader("triplist/avatars"); 
-export const uploadTripImage = createUploader("triplist/trips");
+export const uploadAvatar = createUploader("nomadconnect/avatars"); 
+export const uploadTripImage = createUploader("nomadconnect/trips");
