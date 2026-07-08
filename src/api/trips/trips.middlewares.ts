@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { Trip } from "./trips.model.js";
 import { TripType } from "./trips.types.js";
 import { sendError } from "../../utils/response.utils.js";
 
@@ -14,7 +15,6 @@ interface CustomRequestTrips extends Request {
 export const validateTrip = (req: CustomRequestTrips, res: Response, next: NextFunction) => {
     const { title, country, city, startDate, endDate } = req.body as TripType;
 
-    // Validar que exista el usuario autenticado
     if (!req.user?.id) {
         return sendError(res, "No se ha podido identificar quién organiza este viaje", 401);
     }
@@ -44,4 +44,24 @@ export const validateTrip = (req: CustomRequestTrips, res: Response, next: NextF
     }
 
     return next();
+};
+
+export const checkTripOwner = async (req: CustomRequestTrips, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const trip = await Trip.findById(id);
+
+        if (!trip) {
+            return sendError(res, "Viaje no encontrado", 404);
+        }
+
+        if (trip.owner.toString() !== req.user?.id) {
+            return sendError(res, "No tienes permisos para modificar este viaje", 403);
+        }
+
+        return next();
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
 };
