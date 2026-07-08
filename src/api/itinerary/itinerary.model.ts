@@ -18,10 +18,12 @@ const itinerarySchema = new Schema(
             default: "",
         },
 
-        days: {
-            type: Schema.Types.ObjectId,
-            ref: "days"
-        }
+        days: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "days",
+            },
+        ],
     },
     { timestamps: true }
 );
