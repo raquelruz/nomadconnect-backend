@@ -5,7 +5,8 @@ import { sendError, sendSuccess } from "../../utils/response.utils.js";
 export const getItinerariesByTrip = async (req: Request, res: Response) => {
     try {
         const { tripId } = req.params;
-        const itineraries = await Itinerary.find({ tripId }).populate("days", "date").sort("order");
+
+        const itineraries = await Itinerary.find({ tripId }).populate("days");
 
         return sendSuccess(res, itineraries);
     } catch (error) {
@@ -16,12 +17,13 @@ export const getItinerariesByTrip = async (req: Request, res: Response) => {
 export const createItinerary = async (req: Request, res: Response) => {
     try {
         const { tripId } = req.params;
-        const newItinerary = await Itinerary.create({
+
+        const itinerary = await Itinerary.create({
             tripId,
             ...req.body,
         });
 
-        return sendSuccess(res, newItinerary, "Itinerario creado", 201);
+        return sendSuccess(res, itinerary, "Itinerario creado", 201);
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }
@@ -30,7 +32,10 @@ export const createItinerary = async (req: Request, res: Response) => {
 export const editItinerary = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const itinerary = await Itinerary.findByIdAndUpdate(id, req.body, { new: true });
+
+        const itinerary = await Itinerary.findByIdAndUpdate(id, req.body, {
+            new: true,
+        }).populate("days");
 
         if (!itinerary) {
             return sendError(res, "Itinerario no encontrado", 404);

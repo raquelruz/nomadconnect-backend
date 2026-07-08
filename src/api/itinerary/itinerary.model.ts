@@ -17,15 +17,18 @@ const itinerarySchema = new Schema(
             type: String,
             default: "",
         },
-
-        days: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "days",
-            },
-        ],
     },
-    { timestamps: true }
+    {
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
+    }
 );
+
+itinerarySchema.virtual("days", {
+    ref: "days",
+    localField: "_id",
+    foreignField: "itineraryId",
+});
 
 export const Itinerary = mongoose.model("itineraries", itinerarySchema);
