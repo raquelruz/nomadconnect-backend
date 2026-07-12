@@ -120,8 +120,6 @@ export const createTrip = async (req: Request, res: Response) => {
             image: req.file?.path || null, // ← Guarda la URL de Cloudinary
         };
 
-        console.log("Trip data:", tripData); // DEBUG
-
         const newTrip = await Trip.create(tripData);
 
         return sendSuccess(res, newTrip, "Viaje creado", 201);

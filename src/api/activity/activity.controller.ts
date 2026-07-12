@@ -41,9 +41,12 @@ export const createActivity = async (req: Request, res: Response) => {
     try {
         const { dayId } = req.params;
 
+        const images = req.files ? (req.files as Express.Multer.File[]).map((file) => file.path) : [];
+
         const newActivity = await Activity.create({
             ...req.body,
             dayId,
+            images,
         });
 
         return sendSuccess(res, newActivity, "Actividad creada", 201);
@@ -56,11 +59,20 @@ export const editActivity = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
-        const activity = await Activity.findByIdAndUpdate(id, req.body, { new: true });
+        const activity = await Activity.findById(id);
 
         if (!activity) {
             return sendError(res, "Actividad no encontrada", 404);
         }
+
+        const images = req.files ? (req.files as Express.Multer.File[]).map((file) => file.path) : [];
+
+        activity.set({
+            ...req.body,
+            images: [...activity.images, ...images],
+        });
+
+        await activity.save();
 
         return sendSuccess(res, activity);
     } catch (error) {
