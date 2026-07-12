@@ -45,7 +45,7 @@ export const getTripsByUser = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
         const trips = await Trip.find({ owner: userId, visibility: "public" })
-            .populate("owner", "username avatar")
+            .populate("owner", "username avatar name surname")
             .populate("itinerary", "title description")
             .populate("tasks", "title isCompleted assignedTo")
             .populate("comments", "author text");
@@ -60,8 +60,8 @@ export const getMyTrips = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
         const trips = await Trip.find({ owner: userId })
-            .populate("owner", "username avatar")
-            .populate("members", "username avatar")
+            .populate("owner", "username avatar name surname")
+            .populate("members", "username avatar name surname")
             .populate("tasks", "title isCompleted assignedTo")
             .populate("comments", "author text");
 
@@ -76,8 +76,8 @@ export const getOneTrip = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const trip = await Trip.findById(id)
-            .populate("owner", "username avatar")
-            .populate("members", "username avatar")
+            .populate("owner", "username avatar name surname")
+            .populate("members", "username avatar name surname")
             .populate({
                 path: "itineraries",
                 populate: {
