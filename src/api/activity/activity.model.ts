@@ -62,7 +62,7 @@ const activitySchema = new Schema(
             enum: ["active", "cancelled", "completed"],
             default: "active",
         },
-        
+
         images: [
             {
                 type: String,

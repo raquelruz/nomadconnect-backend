@@ -137,13 +137,13 @@ export const updateTripImage = async (req: Request, res: Response) => {
 
         const { id } = req.params;
         // req.file.path es la URL pública que devuelve Cloudinary.
-        const dream = await Trip.findByIdAndUpdate(id, { image: req.file.path }, { new: true });
+        const trip = await Trip.findByIdAndUpdate(id, { image: req.file.path }, { new: true });
 
-        if (!dream) {
+        if (!trip) {
             return sendError(res, "Viaje no encontrado", 404);
         }
 
-        return sendSuccess(res, dream, "Imagen actualizada");
+        return sendSuccess(res, trip, "Imagen actualizada");
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }
