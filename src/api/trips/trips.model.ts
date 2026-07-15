@@ -35,7 +35,12 @@ const tripSchema: Schema<TripType> = new Schema(
         description: {
             type: String,
             default: "",
-            minLength: 10,
+            validate: {
+                validator: function (value: string) {
+                    return value === "" || value.length >= 10;
+                },
+                message: "La descripción debe tener al menos 10 caracteres.",
+            },
             maxLength: [2000, "El texto es demasiado largo."],
         },
 
