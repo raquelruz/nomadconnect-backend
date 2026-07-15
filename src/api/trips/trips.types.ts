@@ -7,6 +7,7 @@ export type TripType = {
     city: string;
     owner: Types.ObjectId;
     members: Types.ObjectId[];
+    maxMembers: number;
     itineraries: Types.ObjectId[];
     startDate: Date;
     endDate: Date;

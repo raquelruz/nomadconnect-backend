@@ -22,6 +22,12 @@ const tripSchema: Schema<TripType> = new Schema(
             },
         ],
 
+        maxMembers: {
+            type: Number,
+            default: 10,
+            min: [1, "Debe permitirse al menos un miembro."],
+        },
+
         startDate: { type: Date, required: true },
 
         endDate: { type: Date, required: true },
