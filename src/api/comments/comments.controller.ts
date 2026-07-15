@@ -44,9 +44,19 @@ export const getCommentsByActivity = async (req: Request, res: Response) => {
         return sendError(res, (error as Error).message, 500);
     }
 };
+
 export const createComment = async (req: Request, res: Response) => {
     try {
-        const newComment = await Comment.create(req.body);
+        const userId = (req as any).user?._id || (req as any).user?.id;
+
+        if (!userId) {
+            return sendError(res, "Usuario no autenticado", 401);
+        }
+
+        const newComment = await Comment.create({
+            ...req.body,
+            author: userId,
+        });
 
         // TRIP COMMENT
         if (newComment.targetModel === "trips") {
