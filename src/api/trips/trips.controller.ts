@@ -59,7 +59,10 @@ export const getTripsByUser = async (req: Request, res: Response) => {
 export const getMyTrips = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
-        const trips = await Trip.find({ owner: userId })
+
+        const trips = await Trip.find({
+            $or: [{ owner: userId }, { members: userId }],
+        })
             .populate("owner", "username avatar name surname")
             .populate("members", "username avatar name surname")
             .populate("tasks", "title isCompleted assignedTo")
