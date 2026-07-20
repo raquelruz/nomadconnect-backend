@@ -33,7 +33,7 @@ export const getTrips = async (req: Request, res: Response) => {
             }
         }
 
-        const trips = await Trip.find(filter);
+        const trips = await Trip.find(filter).populate("owner", "username avatar name surname");
 
         return sendSuccess(res, trips);
     } catch (error) {
