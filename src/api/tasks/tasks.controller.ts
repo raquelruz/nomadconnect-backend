@@ -37,21 +37,23 @@ export const toggleTask = async (req: Request, res: Response) => {
         task.isCompleted = !task.isCompleted;
         await task.save();
 
-        // Si se acaba de completar, notificar al dueño del sueño
         if (task.isCompleted && task.assignedTo) {
-            const trip = await Trip.findById(task.tripId);
+            try {
+                const trip = await Trip.findById(task.tripId);
 
-            if (!trip) return;
-
-            if (trip.owner && task.assignedTo.toString() !== trip.owner.toString()) {
-                await Notification.create({
-                    recipient: trip.owner,
-                    sender: task.assignedTo,
-                    type: "task_completed",
-                    targetModel: "Task",
-                    targetId: task._id,
-                    message: "Ha completado una tarea",
-                });
+                if (trip?.owner && task.assignedTo.toString() !== trip.owner.toString()) {
+                    await Notification.create({
+                        recipient: trip.owner,
+                        sender: task.assignedTo,
+                        type: "task_completed",
+                        targetModel: "tasks",
+                        targetId: task._id,
+                        trip: task.tripId,
+                        message: "Ha completado una tarea",
+                    });
+                }
+            } catch (notificationError) {
+                console.error("Error creando notificación de tarea completada:", notificationError);
             }
         }
 

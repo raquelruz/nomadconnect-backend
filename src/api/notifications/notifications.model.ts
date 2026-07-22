@@ -15,17 +15,21 @@ const notificationSchema = new Schema(
         type: {
             type: String,
             required: true,
-            enum: ["new_comment", "trip_completed", "new_update"],
+            enum: ["new_comment", "trip_completed", "new_update", "task_completed", "member_joined", "member_left"],
         },
         targetModel: {
             type: String,
             required: true,
-            enum: ["trips", "comments", "updates"],
+            enum: ["trips", "comments", "updates", "tasks"],
         },
         targetId: {
             type: Schema.Types.ObjectId,
             required: true,
             refPath: "targetModel",
+        },
+        trip: {
+            type: Schema.Types.ObjectId,
+            ref: "trips",
         },
         message: {
             type: String,
@@ -34,7 +38,7 @@ const notificationSchema = new Schema(
         isRead: {
             type: Boolean,
             default: false,
-        }
+        },
     },
     {
         timestamps: true,
