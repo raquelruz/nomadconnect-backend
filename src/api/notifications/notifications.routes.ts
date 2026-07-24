@@ -1,14 +1,15 @@
+import { checkAuth } from "../auth/auth.middlewares.js"
 import { Router } from "express";
 import { createNotification, deleteNotification, getNotificationByUser, getUnreadCount, markAsRead } from "./notifications.controller.js";
 
 export const notificationRoutes: Router = Router();
 
-notificationRoutes.get("/user/:userId", getNotificationByUser);
+notificationRoutes.get("/user/:userId", checkAuth, getNotificationByUser);
 
-notificationRoutes.get("/unread/:userId", getUnreadCount);
+notificationRoutes.get("/unread/:userId", checkAuth, getUnreadCount);
 
-notificationRoutes.post("/", createNotification);
+notificationRoutes.post("/", checkAuth, createNotification);
 
-notificationRoutes.patch("/:id/read", markAsRead);
+notificationRoutes.patch("/:id/read", checkAuth, markAsRead);
 
-notificationRoutes.delete("/:id", deleteNotification);
+notificationRoutes.delete("/:id", checkAuth, deleteNotification);

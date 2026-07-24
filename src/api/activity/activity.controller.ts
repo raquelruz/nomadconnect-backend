@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { Activity } from "./activity.model.js";
 import { sendError, sendSuccess } from "../../utils/response.utils.js";
+import { Trip } from "../trips/trips.model.js";
+import { Day } from "../days/days.model.js";
 
 export const getActivitiesByDay = async (req: Request, res: Response) => {
     try {
@@ -41,12 +43,47 @@ export const createActivity = async (req: Request, res: Response) => {
     try {
         const { dayId } = req.params;
 
-        const newActivity = await Activity.create({
+        const userId = (req as any).user?._id || (req as any).user?.id;
+
+        if (!userId) {
+            return sendError(res, "No se ha podido identificar al usuario", 401);
+        }
+
+        const images =
+            ((req.files as Express.Multer.File[]) || []).map(
+                (file) => file.path
+            );
+
+        const activityData = {
             ...req.body,
             dayId,
-        });
+            createdBy: userId,
+            images,
+        };
+
+        const newActivity = await Activity.create(activityData);
 
         return sendSuccess(res, newActivity, "Actividad creada", 201);
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
+export const updateActivitiesImages = async (req: Request, res: Response) => {
+    try {
+        if (!req.file) {
+            return sendError(res, "No se ha enviado ninguna imagen", 400);
+        }
+
+        const { id } = req.params;
+        // req.file.path es la URL pública que devuelve Cloudinary.
+        const day = await Day.findByIdAndUpdate(id, { image: req.file.path }, { new: true });
+
+        if (!day) {
+            return sendError(res, "Viaje no encontrado", 404);
+        }
+
+        return sendSuccess(res, day, "Imagen actualizada");
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }

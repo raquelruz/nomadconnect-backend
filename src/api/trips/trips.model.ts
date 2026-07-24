@@ -22,6 +22,12 @@ const tripSchema: Schema<TripType> = new Schema(
             },
         ],
 
+        maxMembers: {
+            type: Number,
+            default: 10,
+            min: [1, "Debe permitirse al menos un miembro."],
+        },
+
         startDate: { type: Date, required: true },
 
         endDate: { type: Date, required: true },
@@ -29,7 +35,12 @@ const tripSchema: Schema<TripType> = new Schema(
         description: {
             type: String,
             default: "",
-            minLength: 10,
+            validate: {
+                validator: function (value: string) {
+                    return value === "" || value.length >= 10;
+                },
+                message: "La descripción debe tener al menos 10 caracteres.",
+            },
             maxLength: [2000, "El texto es demasiado largo."],
         },
 

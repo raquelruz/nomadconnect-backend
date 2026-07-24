@@ -21,15 +21,15 @@ const activitySchema = new Schema(
         },
 
         members: [
-            { 
+            {
                 type: Schema.Types.ObjectId,
-                ref: "users"
-            }
+                ref: "users",
+            },
         ],
 
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: "users"
+            ref: "users",
         },
 
         date: {
@@ -61,12 +61,18 @@ const activitySchema = new Schema(
             type: String,
             enum: ["active", "cancelled", "completed"],
             default: "active",
-        }
+        },
+
+        images: [
+            {
+                type: String,
+            },
+        ],
     },
     {
         timestamps: true,
-        toJSON: { virtuals : true },
-        toObject: { virtuals: true }
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     }
 );
 
@@ -75,8 +81,8 @@ activitySchema.virtual("comments", {
     localField: "_id",
     foreignField: "targetId",
     match: {
-        targetModel: "activities"
-    }
+        targetModel: "activities",
+    },
 });
 
 export const Activity = mongoose.model<ActivityType>("activities", activitySchema);

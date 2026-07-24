@@ -23,3 +23,4 @@ const createUploader = (folder: string) =>
 
 export const uploadAvatar = createUploader("nomadconnect/avatars"); 
 export const uploadTripImage = createUploader("nomadconnect/trips");
+export const uploadActivitiesImage = createUploader("nomadconnect/activities");

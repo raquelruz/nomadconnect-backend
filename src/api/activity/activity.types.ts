@@ -15,4 +15,5 @@ export interface ActivityType {
     comments?: Types.ObjectId[];
     createdAt?: Date;
     updatedAt?: Date;
+    images: string[]
 }

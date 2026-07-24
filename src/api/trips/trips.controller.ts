@@ -33,7 +33,7 @@ export const getTrips = async (req: Request, res: Response) => {
             }
         }
 
-        const trips = await Trip.find(filter);
+        const trips = await Trip.find(filter).populate("owner", "username avatar name surname");
 
         return sendSuccess(res, trips);
     } catch (error) {
@@ -45,7 +45,7 @@ export const getTripsByUser = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
         const trips = await Trip.find({ owner: userId, visibility: "public" })
-            .populate("owner", "username avatar")
+            .populate("owner", "username avatar name surname")
             .populate("itinerary", "title description")
             .populate("tasks", "title isCompleted assignedTo")
             .populate("comments", "author text");
@@ -59,9 +59,12 @@ export const getTripsByUser = async (req: Request, res: Response) => {
 export const getMyTrips = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
-        const trips = await Trip.find({ owner: userId })
-            .populate("owner", "username avatar")
-            .populate("members", "username avatar")
+
+        const trips = await Trip.find({
+            $or: [{ owner: userId }, { members: userId }],
+        })
+            .populate("owner", "username avatar name surname")
+            .populate("members", "username avatar name surname")
             .populate("tasks", "title isCompleted assignedTo")
             .populate("comments", "author text");
 
@@ -76,8 +79,8 @@ export const getOneTrip = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const trip = await Trip.findById(id)
-            .populate("owner", "username avatar")
-            .populate("members", "username avatar")
+            .populate("owner", "username avatar name surname")
+            .populate("members", "username avatar name surname")
             .populate({
                 path: "itineraries",
                 populate: {
@@ -120,8 +123,6 @@ export const createTrip = async (req: Request, res: Response) => {
             image: req.file?.path || null, // ← Guarda la URL de Cloudinary
         };
 
-        console.log("Trip data:", tripData); // DEBUG
-
         const newTrip = await Trip.create(tripData);
 
         return sendSuccess(res, newTrip, "Viaje creado", 201);
@@ -139,13 +140,13 @@ export const updateTripImage = async (req: Request, res: Response) => {
 
         const { id } = req.params;
         // req.file.path es la URL pública que devuelve Cloudinary.
-        const dream = await Trip.findByIdAndUpdate(id, { image: req.file.path }, { new: true });
+        const trip = await Trip.findByIdAndUpdate(id, { image: req.file.path }, { new: true });
 
-        if (!dream) {
+        if (!trip) {
             return sendError(res, "Viaje no encontrado", 404);
         }
 
-        return sendSuccess(res, dream, "Imagen actualizada");
+        return sendSuccess(res, trip, "Imagen actualizada");
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }
