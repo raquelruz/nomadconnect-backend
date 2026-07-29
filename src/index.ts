@@ -33,8 +33,20 @@ app.use(express.json());
 app.use(helmet());
 
 // CORS. Decide quién pasa y quien no.
+const allowedOrigins = [
+    "https://mynomadconnect.vercel.app",
+    "http://localhost:5173"
+];
+
 app.use(cors({
-    origin: "https://mynomadconnect.vercel.app", 
+    origin: (origin, callback) => {
+        // Permite peticiones sin origin (ej. Postman) y las de la lista
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("No permitido por CORS"));
+        }
+    },
     credentials: true
 }));
 
