@@ -5,7 +5,8 @@ import dns from "dns";
 dns.setDefaultResultOrder("ipv4first");
 
 const DB_URL: string = process.env.MONGO_URI || "";
-console.log("MONGO_URI:", process.env.MONGO_URI);
+
+let isConnected = false;
 
 const cleanModels = (): void => {
     mongoose.modelNames().forEach((modelName: string) => {
@@ -21,13 +22,17 @@ const cleanModels = (): void => {
 };
 
 const connect = async (): Promise<void> => {
+    if (isConnected) return;
+
     try {
         const db = await mongoose.connect(DB_URL);
+        isConnected = db.connections[0].readyState === 1;
         const { name, host } = db.connection;
         console.log(`DB Connected: ${name} in ${host}`);
         cleanModels();
     } catch (error) {
         console.log("Error conectando a la base de datos", error);
+        throw error;
     }
 };
 
