@@ -53,6 +53,16 @@ app.use(cors({
 // Middleware global
 app.use(requestLogger)
 
+// Asegura conexión a la BD antes de procesar cualquier petición
+app.use(async (req: Request, res: Response, next) => {
+    try {
+        await db.connect();
+        next();
+    } catch (error) {
+        res.status(500).json({ status: "error", message: "Error de conexión a la base de datos" });
+    }
+});
+
 // Crea la ruta /
 app.get("/", (req: Request, res: Response) => {
     // console.log(process.env.MONGO_URI);
