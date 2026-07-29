@@ -33,7 +33,10 @@ app.use(express.json());
 app.use(helmet());
 
 // CORS. Decide quién pasa y quien no.
-app.use(cors());
+app.use(cors({
+    origin: "https://mynomadconnect.vercel.app", 
+    credentials: true
+}));
 
 // Middleware global
 app.use(requestLogger)
