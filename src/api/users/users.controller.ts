@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { v2 as cloudinary } from "cloudinary";
 import { User } from "./users.model.js";
 import { Trip } from "../trips/trips.model.js";
 import { Task } from "../tasks/tasks.model.js";
@@ -91,6 +92,52 @@ export const updateAvatar = async (req: Request, res: Response) => {
         }
 
         return sendSuccess(res, user, "Avatar actualizado");
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
+// Extrae el public_id de Cloudinary a partir de la URL guardada en `avatar`.
+// Ej: https://res.cloudinary.com/<cloud>/image/upload/v169.../nomadconnect/avatars/abc123.jpg
+//     -> nomadconnect/avatars/abc123
+const extractCloudinaryPublicId = (url: string): string | null => {
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/);
+    return match ? match[1] : null;
+};
+
+export const deleteAvatar = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user?._id || (req as any).user?.id;
+
+        if (!userId) {
+            return sendError(res, "No autorizado", 401);
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return sendError(res, "Usuario no encontrado", 404);
+        }
+
+        if (!user.avatar) {
+            return sendError(res, "El usuario no tiene avatar", 400);
+        }
+
+        const publicId = extractCloudinaryPublicId(user.avatar);
+
+        if (publicId) {
+            try {
+                await cloudinary.uploader.destroy(publicId);
+            } catch (cloudinaryError) {
+                // No bloqueamos el borrado en BD si Cloudinary falla (ej. archivo ya no existe)
+                console.error("Error borrando avatar en Cloudinary:", cloudinaryError);
+            }
+        }
+
+        user.avatar = undefined;
+        await user.save();
+
+        return sendSuccess(res, user, "Avatar eliminado");
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }
