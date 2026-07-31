@@ -110,6 +110,27 @@ export const getOneTrip = async (req: Request, res: Response) => {
     }
 };
 
+export const getLikedTrips = async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return sendError(res, "Usuario no encontrado", 404);
+        }
+
+        const trips = await Trip.find({ _id: { $in: user.likedTrips || [] } }).populate(
+            "owner",
+            "username avatar name surname"
+        );
+
+        return sendSuccess(res, trips);
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
 export const createTrip = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user?._id || (req as any).user?.id;

@@ -9,6 +9,7 @@ import {
     deleteTrip,
     updateTripImage,
     toggleLikeTrip,
+    getLikedTrips,
 } from "./trips.controller.js";
 
 import { joinTrip, leaveTrip } from "./members/members.controller.js";
@@ -43,4 +44,6 @@ tripRoutes.delete("/:id/leave", checkAuth, leaveTrip);
 
 
 // Likes
+tripRoutes.get("/liked/:userId", checkAuth, getLikedTrips);
+
 tripRoutes.post("/:id/like", checkAuth, toggleLikeTrip);
