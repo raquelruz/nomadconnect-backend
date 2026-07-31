@@ -55,6 +55,13 @@ const userSchema: Schema<UserType> = new Schema(
             required: true,
             default: false,
         },
+
+        likedTrips: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "trips"
+            }
+        ]
     },
     
     {

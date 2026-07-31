@@ -49,6 +49,12 @@ const tripSchema: Schema<TripType> = new Schema(
         image: { type: String },
 
         status: { type: String, enum: ["pending", "completed"], default: "pending" },
+    
+        likesCount: {
+            type: Number,
+            default: 0,
+            min: 0
+        }
     },
 
     {
