@@ -46,6 +46,7 @@ export const register = async (req: Request, res: Response) => {
                     name: newUser.name,
                     surname: newUser.surname,
                     avatar: newUser.avatar,
+                    likedTrips: newUser.likedTrips,
                 },
             },
             "Cuenta creada correctamente",
@@ -96,6 +97,7 @@ export const login = async (req: Request, res: Response) => {
                     name: user.name,
                     surname: user.surname,
                     avatar: user.avatar,
+                    likedTrips: user.likedTrips,
                 },
             },
             "Has iniciado sesión correctamente"
