@@ -16,12 +16,13 @@ import { joinTrip, leaveTrip } from "./members/members.controller.js";
 
 import { validateTrip } from "./trips.middlewares.js";
 import { uploadTripImage } from "../../config/cloudinary.js";
-import { checkAuth } from "../auth/auth.middlewares.js";
+import { checkAuth, checkAuthOptional } from "../auth/auth.middlewares.js";
+import { checkNotBlocked } from "./members/members.middlewares.js";
 
 export const tripRoutes: Router = Router();
 
 // Públicas
-tripRoutes.get("/", getTrips);
+tripRoutes.get("/", checkAuthOptional, getTrips);
 tripRoutes.get("/user/:userId", getTripsByUser);
 tripRoutes.get("/:id", getOneTrip);
 
@@ -30,7 +31,6 @@ tripRoutes.get("/my-trips/:userId", checkAuth, getMyTrips);
 
 tripRoutes.post("/", checkAuth, [uploadTripImage.single("image"), validateTrip], createTrip);
 
-
 tripRoutes.put("/:id", checkAuth, editTrip);
 
 tripRoutes.patch("/:id/image", checkAuth, uploadTripImage.single("image"), updateTripImage);
@@ -38,10 +38,9 @@ tripRoutes.patch("/:id/image", checkAuth, uploadTripImage.single("image"), updat
 tripRoutes.delete("/:id", checkAuth, deleteTrip);
 
 // Miembros
-tripRoutes.post("/:id/join", checkAuth, joinTrip);
+tripRoutes.post("/:id/join", checkAuth, checkNotBlocked, joinTrip);
 
 tripRoutes.delete("/:id/leave", checkAuth, leaveTrip);
-
 
 // Likes
 tripRoutes.get("/liked/:userId", checkAuth, getLikedTrips);

@@ -8,14 +8,23 @@ import { Task } from "../tasks/tasks.model.js";
 import { Notification } from "../notifications/notifications.model.js";
 import { sendError, sendSuccess } from "../../utils/response.utils.js";
 import { User } from "../users/users.model.js";
+import { getBlockedRelationIds } from "../../utils/blocks.utils.js";
 
 export const getTrips = async (req: Request, res: Response) => {
     try {
         const { search, date } = req.query;
+        const userId = (req as any).user?._id || (req as any).user?.id;
 
         const filter: any = {
             visibility: "public",
         };
+
+        if (userId) {
+            const excludedOwnerIds = await getBlockedRelationIds(userId.toString());
+            if (excludedOwnerIds.length > 0) {
+                filter.owner = { $nin: excludedOwnerIds };
+            }
+        }
 
         if (typeof search === "string" && search.trim() !== "") {
             filter.$or = [
@@ -27,7 +36,6 @@ export const getTrips = async (req: Request, res: Response) => {
 
         if (date && typeof date === "string" && date !== "undefined") {
             const d = new Date(date);
-
             if (!isNaN(d.getTime())) {
                 filter.startDate = { $lte: d };
                 filter.endDate = { $gte: d };

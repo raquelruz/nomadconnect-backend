@@ -16,4 +16,5 @@ export type UserType = {
     languages?: string;
     isPublic: boolean;
     likedTrips?: Types.ObjectId[];
+    blockedUsers?: Types.ObjectId[];
 };
