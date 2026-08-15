@@ -10,3 +10,13 @@ export const areUsersBlocked = async (userIdA: string, userIdB: string): Promise
 
     return blockRelation !== null;
 };
+
+export const getBlockedRelationIds = async (userId: string): Promise<string[]> => {
+    const me = await User.findById(userId).select("blockedUsers").lean();
+    const blockedByMe = me?.blockedUsers?.map((id) => id.toString()) || [];
+
+    const blockedMe = await User.find({ blockedUsers: userId }).select("_id").lean();
+    const whoBlockedMe = blockedMe.map((u) => u._id.toString());
+
+    return [...new Set([...blockedByMe, ...whoBlockedMe])];
+};
