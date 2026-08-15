@@ -17,6 +17,7 @@ import { joinTrip, leaveTrip } from "./members/members.controller.js";
 import { validateTrip } from "./trips.middlewares.js";
 import { uploadTripImage } from "../../config/cloudinary.js";
 import { checkAuth } from "../auth/auth.middlewares.js";
+import { checkNotBlocked } from "./members/members.middlewares.js";
 
 export const tripRoutes: Router = Router();
 
@@ -38,7 +39,7 @@ tripRoutes.patch("/:id/image", checkAuth, uploadTripImage.single("image"), updat
 tripRoutes.delete("/:id", checkAuth, deleteTrip);
 
 // Miembros
-tripRoutes.post("/:id/join", checkAuth, joinTrip);
+tripRoutes.post("/:id/join", checkAuth, checkNotBlocked, joinTrip);
 
 tripRoutes.delete("/:id/leave", checkAuth, leaveTrip);
 
