@@ -31,11 +31,60 @@ export const getOneUser = async (req: Request, res: Response) => {
     }
 };
 
+export const getBlockedUsers = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user?._id || (req as any).user?.id;
+
+        if (!userId) {
+            return sendError(res, "No autorizado", 401);
+        }
+
+        const user = await User.findById(userId)
+            .select("blockedUsers")
+            .populate("blockedUsers", "username name surname avatar");
+
+        if (!user) {
+            return sendError(res, "Usuario no encontrado", 404);
+        }
+
+        return sendSuccess(res, user.blockedUsers);
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
 export const createUser = async (req: Request, res: Response) => {
     try {
         const newUser = await User.create(req.body);
 
         return sendSuccess(res, newUser, "Usuario creado", 201);
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
+export const blockUser = async (req: Request, res: Response) => {
+    try {
+        const blockerId = (req as any).user?._id || (req as any).user?.id;
+        const blockedId = req.params.id;
+
+        if (!blockerId) {
+            return sendError(res, "No autorizado", 401);
+        }
+
+        if (blockerId === blockedId) {
+            return sendError(res, "No puedes bloquearte a ti mismo", 400);
+        }
+
+        const userToBlock = await User.findById(blockedId);
+
+        if (!userToBlock) {
+            return sendError(res, "Usuario no encontrado", 404);
+        }
+
+        const user = await User.findByIdAndUpdate(blockerId, { $addToSet: { blockedUsers: blockedId } }, { new: true });
+
+        return sendSuccess(res, user?.blockedUsers, "Usuario bloqueado");
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }
@@ -160,6 +209,23 @@ export const deleteUser = async (req: Request, res: Response) => {
         await Comment.deleteMany({ tripId: { $in: tripIds } });
 
         return sendSuccess(res, user);
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
+export const unblockUser = async (req: Request, res: Response) => {
+    try {
+        const blockerId = (req as any).user?._id || (req as any).user?.id;
+        const blockedId = req.params.id;
+
+        if (!blockerId) {
+            return sendError(res, "No autorizado", 401);
+        }
+
+        const user = await User.findByIdAndUpdate(blockerId, { $pull: { blockedUsers: blockedId } }, { new: true });
+
+        return sendSuccess(res, user?.blockedUsers, "Usuario desbloqueado");
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }
