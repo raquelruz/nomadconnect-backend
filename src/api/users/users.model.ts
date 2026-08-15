@@ -15,7 +15,7 @@ const userSchema: Schema<UserType> = new Schema(
             type: String,
             required: [true, "El email es obligatorio."],
             lowercase: true,
-            inmutable: true, // OJO. Una vez creado, no se podrá cambiar.
+            immutable: true, // OJO. Una vez creado, no se podrá cambiar.
         },
         password: {
             type: String,
@@ -55,6 +55,20 @@ const userSchema: Schema<UserType> = new Schema(
             required: true,
             default: false,
         },
+
+        likedTrips: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "trips"
+            }
+        ],
+
+        blockedUsers: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "users"
+            }
+        ]
     },
     
     {

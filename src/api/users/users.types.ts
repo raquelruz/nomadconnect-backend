@@ -15,4 +15,6 @@ export type UserType = {
     bio?: string;
     languages?: string;
     isPublic: boolean;
+    likedTrips?: Types.ObjectId[];
+    blockedUsers?: Types.ObjectId[];
 };

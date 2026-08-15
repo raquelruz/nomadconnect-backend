@@ -7,14 +7,24 @@ import { Comment } from "../comments/comments.model.js";
 import { Task } from "../tasks/tasks.model.js";
 import { Notification } from "../notifications/notifications.model.js";
 import { sendError, sendSuccess } from "../../utils/response.utils.js";
+import { User } from "../users/users.model.js";
+import { getBlockedRelationIds } from "../../utils/blocks.utils.js";
 
 export const getTrips = async (req: Request, res: Response) => {
     try {
         const { search, date } = req.query;
+        const userId = (req as any).user?._id || (req as any).user?.id;
 
         const filter: any = {
             visibility: "public",
         };
+
+        if (userId) {
+            const excludedOwnerIds = await getBlockedRelationIds(userId.toString());
+            if (excludedOwnerIds.length > 0) {
+                filter.owner = { $nin: excludedOwnerIds };
+            }
+        }
 
         if (typeof search === "string" && search.trim() !== "") {
             filter.$or = [
@@ -26,7 +36,6 @@ export const getTrips = async (req: Request, res: Response) => {
 
         if (date && typeof date === "string" && date !== "undefined") {
             const d = new Date(date);
-
             if (!isNaN(d.getTime())) {
                 filter.startDate = { $lte: d };
                 filter.endDate = { $gte: d };
@@ -109,6 +118,27 @@ export const getOneTrip = async (req: Request, res: Response) => {
     }
 };
 
+export const getLikedTrips = async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return sendError(res, "Usuario no encontrado", 404);
+        }
+
+        const trips = await Trip.find({ _id: { $in: user.likedTrips || [] } }).populate(
+            "owner",
+            "username avatar name surname"
+        );
+
+        return sendSuccess(res, trips);
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
 export const createTrip = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user?._id || (req as any).user?.id;
@@ -147,6 +177,49 @@ export const updateTripImage = async (req: Request, res: Response) => {
         }
 
         return sendSuccess(res, trip, "Imagen actualizada");
+    } catch (error) {
+        return sendError(res, (error as Error).message, 500);
+    }
+};
+
+export const toggleLikeTrip = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = (req as any).user?._id || (req as any).user?.id;
+
+        if (!userId) {
+            return sendError(res, "No autorizado", 401);
+        }
+
+        const trip = await Trip.findById(id);
+
+        if (!trip) {
+            return sendError(res, "Viaje no encontrado", 404);
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return sendError(res, "Usuario no encontrado", 404);
+        }
+
+        const alreadyLiked = user.likedTrips?.some((tripId) => tripId.toString() === id);
+
+        if (alreadyLiked) {
+            await User.findByIdAndUpdate(userId, { $pull: { likedTrips: id } });
+            trip.likesCount = Math.max(0, (trip.likesCount || 0) - 1);
+        } else {
+            await User.findByIdAndUpdate(userId, { $addToSet: { likedTrips: id } });
+            trip.likesCount = (trip.likesCount || 0) + 1;
+        }
+
+        await trip.save();
+
+        return sendSuccess(res, {
+            tripId: trip.id,
+            likesCount: trip.likesCount,
+            liked: !alreadyLiked,
+        });
     } catch (error) {
         return sendError(res, (error as Error).message, 500);
     }

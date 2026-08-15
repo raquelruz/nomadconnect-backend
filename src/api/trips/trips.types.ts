@@ -15,4 +15,5 @@ export type TripType = {
     image: string;
     visibility: "public" | "private";
     status: "pending" | "completed";
+    likesCount?: number;
 };

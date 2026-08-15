@@ -16,7 +16,7 @@ export const register = async (req: Request, res: Response) => {
         }
 
         // Encriptamos la contraseña antes de guardarla
-        const hashedPassword = await bcrypt.hash(password, SALT_NUMBER); 
+        const hashedPassword = await bcrypt.hash(password, SALT_NUMBER);
 
         const newUser = await User.create({
             ...req.body,
@@ -46,6 +46,7 @@ export const register = async (req: Request, res: Response) => {
                     name: newUser.name,
                     surname: newUser.surname,
                     avatar: newUser.avatar,
+                    likedTrips: newUser.likedTrips,
                 },
             },
             "Cuenta creada correctamente",
@@ -70,7 +71,11 @@ export const login = async (req: Request, res: Response) => {
         const isPasswordValid = user ? await bcrypt.compare(password, user.password) : false;
 
         if (!user || !isPasswordValid) {
-            return sendError(res, "Credenciales inválidas. Si no recuerdas tu contraseña, pulsa en 'Recuperar contraseña' ", 401);
+            return sendError(
+                res,
+                "Credenciales inválidas. Si no recuerdas tu contraseña, pulsa en 'Recuperar contraseña' ",
+                401
+            );
         }
 
         if (!process.env.JWT_SECRET) {
@@ -78,11 +83,9 @@ export const login = async (req: Request, res: Response) => {
         }
 
         // Guardamos id, email y rol en el payload del JWT (la "pulsera VIP")
-        const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "2h" }
-        );
+        const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
+            expiresIn: "2h",
+        });
 
         return sendSuccess(
             res,
@@ -96,6 +99,7 @@ export const login = async (req: Request, res: Response) => {
                     name: user.name,
                     surname: user.surname,
                     avatar: user.avatar,
+                    likedTrips: user.likedTrips,
                 },
             },
             "Has iniciado sesión correctamente"
@@ -113,11 +117,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
         const { currentPassword, newPassword, repeatNewPassword } = req.body;
 
         if (!currentPassword || !newPassword || !repeatNewPassword) {
-            return sendError(
-                res,
-                "Debes completar todos los campos",
-                400
-            );
+            return sendError(res, "Debes completar todos los campos", 400);
         }
 
         if (newPassword !== repeatNewPassword) {
@@ -136,10 +136,11 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
         if (!user) return sendError(res, "Usuario no encontrado", 404);
 
         const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
-        if (!isCurrentValid) {
-            return sendError(res, "La contraseña actual no es correcta", 401);
-        }
 
+        if (!isCurrentValid) {
+            return sendError(res, "La contraseña actual no es correcta", 400);
+        }
+        
         user.password = await bcrypt.hash(newPassword, SALT_NUMBER);
         await user.save();
 

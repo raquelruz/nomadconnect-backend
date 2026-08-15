@@ -42,3 +42,25 @@ export const checkRole = (rolesRequired: string | string[]) => {
         return next();
     };
 };
+
+// Portero 3: Igual que checkAuth, pero nunca corta la petición.
+// Si hay token válido, identifica al usuario (req.user). Si no hay token,
+// o es inválido, deja pasar igualmente sin req.user. Para rutas públicas
+// que quieren personalizarse SI hay sesión, sin exigirla.
+export const checkAuthOptional = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret") as AuthPayload;
+        const user = await User.findOne({ email: decoded.email }).lean();
+        req.user = { ...decoded, ...user };
+    } catch {
+        // Token inválido/caducado: seguimos igualmente, simplemente sin usuario identificado
+    }
+
+    return next();
+};
