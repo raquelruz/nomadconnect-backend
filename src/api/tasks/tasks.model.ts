@@ -10,11 +10,19 @@ const taskSchema: Schema<TaskType> = new Schema (
         },
 
         title: { type: String, required: [true, "La tarea debe tener un título"] },
+
         isCompleted: { type: Boolean, default: false },
+
         order: { type: Number },
+
         assignedTo: {
             type: Schema.Types.ObjectId,
             ref: "users"
+        },
+
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: "users",
         }
     },
     { 

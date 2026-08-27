@@ -7,4 +7,5 @@ export type TaskType = {
     isCompleted: boolean;
     order?: number;
     assignedTo?: Types.ObjectId;
+    createdBy?: Types.ObjectId;
 };

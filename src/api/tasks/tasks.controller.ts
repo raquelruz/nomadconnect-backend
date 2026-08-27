@@ -17,7 +17,18 @@ export const getTasksByTrip = async (req: Request, res: Response) => {
 
 export const createTask = async (req: Request, res: Response) => {
     try {
-        const newTask = await Task.create(req.body);
+        const userId = (req as any).user?._id || (req as any).user?.id;
+
+        if (!userId) {
+            return sendError(res, "No se ha podido identificar al usuario", 401);
+        }
+
+        const taskData = {
+            ...req.body,
+            createdBy: userId,
+        };
+
+        const newTask = await Task.create(taskData);
 
         return sendSuccess(res, newTask, "Tarea creada", 201);
     } catch (error) {
