@@ -63,7 +63,7 @@ export const checkTaskMember = async (req: CustomRequestTasks, res: Response, ne
     }
 };
 
-export const checkTaskOwnerOrAssignee = async (req: CustomRequestTasks, res: Response, next: NextFunction) => {
+export const checkTaskOwnerOrCreator = async (req: CustomRequestTasks, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
 
@@ -80,9 +80,9 @@ export const checkTaskOwnerOrAssignee = async (req: CustomRequestTasks, res: Res
         }
 
         const isOwner = trip.owner.toString() === req.user?.id;
-        const isAssignee = task.assignedTo?.toString() === req.user?.id;
+        const isCreator = task.createdBy?.toString() === req.user?.id;
 
-        if (!isOwner && !isAssignee) {
+        if (!isOwner && !isCreator) {
             return sendError(res, "No tienes permisos para modificar esta tarea", 403);
         }
 
